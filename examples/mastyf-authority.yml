@@ -1,0 +1,13 @@
+# Copy to .github/workflows/mastyf-authority.yml in a PRIVATE repository (for example a new one named mastyf-reports).
+name: Mastyf Authority
+on:
+  schedule: [{ cron: "0 6 * * 1" }]   # Mondays, 06:00 UTC
+  workflow_dispatch:                  # or run it now: Actions -> Mastyf Authority -> Run workflow
+permissions: { contents: read, issues: write }
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mastyf-ai/authority-action@v1
+        with:
+          org-token: ${{ secrets.MASTYF_ORG_TOKEN }}   # optional, read-only: covers every repository

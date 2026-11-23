@@ -1,0 +1,43 @@
+name: Mastyf Authority Weekly Report
+description: A weekly issue listing the GitHub changes that should have needed a second person's approval. Runs in your GitHub; sends nothing out.
+author: Mastyf Labs
+branding: { icon: shield, color: yellow }
+inputs:
+  github-token:
+    description: Token to read this repository and post the report (the workflow's own token is enough)
+    default: ${{ github.token }}
+  org-token:
+    description: >
+      Optional read-only fine-grained token for the whole organisation (Administration: Read-only on all repositories,
+      Members: Read-only on the organisation). Without it the report covers only this repository.
+    default: ""
+  days: { description: Days covered by each report, default: "7" }
+  model: { description: "preview (a small model trained here on synthetic incidents) or none", default: preview }
+  allow-public:
+    description: Allow posting in a public repository (reports name accounts and repositories; off by default)
+    default: "false"
+  dry-run: { description: Print the report in the log instead of posting it, default: "false" }
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+      with: { python-version: "3.12" }
+    - name: Install Mastyf Authority (pinned to an exact commit of the open-source engine)
+      shell: bash
+      run: >
+        python -m pip install --quiet --disable-pip-version-check
+        "mastyf-authority @ git+https://github.com/mastyf-ai/mastyf-authority@fd3e02712f24476960332ac47f72334528bd6c7a"
+    - name: Weekly report
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        MASTYF_ORG_TOKEN: ${{ inputs.org-token }}
+        INPUT_DAYS: ${{ inputs.days }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_ALLOW_PUBLIC: ${{ inputs.allow-public }}
+        INPUT_DRY_RUN: ${{ inputs.dry-run }}
+      run: |
+        args=(--days "$INPUT_DAYS" --model "$INPUT_MODEL")
+        [ "$INPUT_ALLOW_PUBLIC" = "true" ] && args+=(--allow-public)
+        [ "$INPUT_DRY_RUN" = "true" ] && args+=(--dry-run)
+        authority github-report "${args[@]}"
