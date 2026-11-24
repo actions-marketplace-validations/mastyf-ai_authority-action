@@ -1,5 +1,5 @@
 name: Mastyf Authority Weekly Report
-description: A weekly issue listing the GitHub changes that should have needed a second person's approval. Runs in your GitHub; sends nothing out.
+description: Weekly report of GitHub changes that should have needed a second person's approval. Runs in your GitHub.
 author: Mastyf Labs
 branding: { icon: shield, color: yellow }
 inputs:
